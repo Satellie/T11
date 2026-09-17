@@ -207,6 +207,15 @@ class KeyboardHook:
             WH_KEYBOARD_LL,
             self._hook_proc,
             h_instance,
+        # Создаём функцию-обработчик (должна жить пока хук активен)
+        self._hook_proc = HOOKPROC(self._low_level_handler)
+        
+        # Устанавливаем хук
+        # HINSTANCE = NULL (0) для WH_KEYBOARD_LL
+        self.hook_handle = self.user32.SetWindowsHookExA(
+            WH_KEYBOARD_LL,
+            self._hook_proc,
+            self.kernel32.GetModuleHandleW(None),  # HINSTANCE текущего модуля
             0  # 0 = глобальный хук для всех потоков
         )
         
