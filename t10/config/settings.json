@@ -1,0 +1,7 @@
+{
+    "blacklist_apps": [],
+    "hotkey_undo": "Ctrl+Shift+Z",
+    "enable_notifications": true,
+    "language_priority": "ru",
+    "use_yandex_fallback": true
+}
