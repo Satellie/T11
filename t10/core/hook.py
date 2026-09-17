@@ -198,9 +198,9 @@ class KeyboardHook:
         # Для WH_KEYBOARD_LL параметр hInstance ДОЛЖЕН быть NULL (0)
         # Согласно документации Microsoft: "This parameter must be NULL if the dwThreadId parameter is zero"
         # и для low-level хуков используется 0
-        h_instance = None  # ctypes интерпретирует это как NULL
+        h_instance = ctypes.c_void_p(0)  # Явный NULL
         
-        logger.debug(f"Установка хука с hInstance={h_instance}")
+        logger.debug(f"Установка хука с hInstance={h_instance.value}")
         
         # Устанавливаем хук
         self.hook_handle = self.user32.SetWindowsHookExA(
