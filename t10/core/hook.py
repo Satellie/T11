@@ -78,7 +78,7 @@ class KeyboardHook:
             # Проверяем тип события (нажатие клавиши)
             if w_param in (WM_KEYDOWN, WM_SYSKEYDOWN):
                 struct_ptr = ctypes.cast(l_param, ctypes.POINTER(KBDLLHOOKSTRUCT))
-                vk_code = struct_ptr.contents.vk_code
+                vk_code = struct_ptr.contents.vkCode
                 
                 # Преобразуем виртуальный код клавиши в символ
                 char = self._vk_to_char(vk_code)
@@ -190,20 +190,30 @@ class KeyboardHook:
         
         self._running = True
         
-        # Создаём функцию-обработчик (должна жить пока хук активен)
+        # Создаём функцию-обработчик
+        # ВАЖНО: сохраняем ссылку на hook_proc в атрибуте экземпляра,
+        # чтобы она не была уничтожена сборщиком мусора
         self._hook_proc = HOOKPROC(self._low_level_handler)
         
+        # Для WH_KEYBOARD_LL параметр hInstance ДОЛЖЕН быть NULL (0)
+        # Согласно документации Microsoft: "This parameter must be NULL if the dwThreadId parameter is zero"
+        # и для low-level хуков используется 0
+        h_instance = None  # ctypes интерпретирует это как NULL
+        
+        logger.debug(f"Установка хука с hInstance={h_instance}")
+        
         # Устанавливаем хук
-        # HINSTANCE = NULL (0) для WH_KEYBOARD_LL
         self.hook_handle = self.user32.SetWindowsHookExA(
             WH_KEYBOARD_LL,
             self._hook_proc,
-            self.kernel32.GetModuleHandleW(None),  # HINSTANCE текущего модуля
+            h_instance,
             0  # 0 = глобальный хук для всех потоков
         )
         
         if not self.hook_handle:
             error_code = self.kernel32.GetLastError()
+            # Снимает хук на всякий случай
+            self._running = False
             raise RuntimeError(f"Не удалось установить хук. Код ошибки: {error_code}")
         
         logger.info("Хук клавиатуры успешно установлен")
