@@ -190,6 +190,23 @@ class KeyboardHook:
         
         self._running = True
         
+        # Создаём функцию-обработчик
+        # ВАЖНО: сохраняем ссылку на hook_proc в атрибуте экземпляра,
+        # чтобы она не была уничтожена сборщиком мусора
+        self._hook_proc = HOOKPROC(self._low_level_handler)
+        
+        # Для WH_KEYBOARD_LL параметр hInstance ДОЛЖЕН быть NULL (0)
+        # Согласно документации Microsoft: "This parameter must be NULL if the dwThreadId parameter is zero"
+        # и для low-level хуков используется 0
+        h_instance = None  # ctypes интерпретирует это как NULL
+        
+        logger.debug(f"Установка хука с hInstance={h_instance}")
+        
+        # Устанавливаем хук
+        self.hook_handle = self.user32.SetWindowsHookExA(
+            WH_KEYBOARD_LL,
+            self._hook_proc,
+            h_instance,
         # Создаём функцию-обработчик (должна жить пока хук активен)
         self._hook_proc = HOOKPROC(self._low_level_handler)
         
@@ -204,6 +221,8 @@ class KeyboardHook:
         
         if not self.hook_handle:
             error_code = self.kernel32.GetLastError()
+            # Снимает хук на всякий случай
+            self._running = False
             raise RuntimeError(f"Не удалось установить хук. Код ошибки: {error_code}")
         
         logger.info("Хук клавиатуры успешно установлен")
