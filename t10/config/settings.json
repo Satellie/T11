@@ -1,7 +1,22 @@
 {
-    "blacklist_apps": [],
-    "hotkey_undo": "Ctrl+Shift+Z",
+    "enable_correction": true,
     "enable_notifications": true,
     "language_priority": "ru",
-    "use_yandex_fallback": true
+    "hotkey_undo": "Ctrl+Shift+Z",
+    "use_cloud_fallback": false,
+    "blacklist_apps": [
+        "code.exe",
+        "pycharm64.exe",
+        "cmd.exe",
+        "powershell.exe",
+        "WindowsTerminal.exe"
+    ],
+    "jamspell_port_ru": 8080,
+    "jamspell_port_en": 8081,
+    "jamspell_timeout_ms": 500,
+    "yandex_timeout_ms": 800,
+    "levenshtein_max_distance": 3,
+    "short_word_min_length": 4,
+    "history_max_size": 500
 }
+
